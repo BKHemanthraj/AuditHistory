@@ -8,16 +8,26 @@ using {
 
 entity Customer {
 
-    key customerId                     : String;
-        customerName                   : String;
-        email                          : String;
-        phoneNumber                    : String;
-        address                        : String;
-        CustomerToAuditHistoryCustomer : Composition of many AuditHistoryCustomer
-                                             on CustomerToAuditHistoryCustomer.AuditHistoryCustomerToCustomer = $self;
-        CustomerToOrders               : Composition of many Orders
-                                             on CustomerToOrders.OrdersToCustomer = $self;
+    @readonly
+    key customerId : String;
+    customerNo : Integer;
+    @mandatory
+    customerName : String;
+    @mandatory
+    email : String;
+    @mandatory
+    @assert.format: '^[0-9]{10}$'
+    phoneNumber : String;
+    @mandatory
+    address : String;
+    CustomerToAuditHistoryCustomer : Composition of many AuditHistoryCustomer
+        on CustomerToAuditHistoryCustomer.AuditHistoryCustomerToCustomer = $self;
+    CustomerToOrders : Composition of many Orders
+        on CustomerToOrders.OrdersToCustomer = $self;
+    CustomerToAuditHistory : Composition of many AuditHistory
+        on CustomerToAuditHistory.AuditHistoryToCustomer = $self;
 }
+
 
 entity AuditHistoryCustomer : cuid, managed {
     key customerId                     : String;
@@ -54,6 +64,16 @@ entity Payment {
 
         PaymentToOrder : Association to one Orders
                              on PaymentToOrder.orderId = orderId;
+}
+
+
+entity AuditHistory : cuid, managed {
+    key customerId : String;
+        fieldName:String;
+        value:String;
+        AuditHistoryToCustomer : Association to one Customer
+                                             on AuditHistoryToCustomer.customerId = customerId;
+
 }
 
 
